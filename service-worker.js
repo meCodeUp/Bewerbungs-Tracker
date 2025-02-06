@@ -1,31 +1,26 @@
 // service-worker.js
 
-const CACHE_NAME = "bewerbungs-tracker-cache-v1";
+const CACHE_NAME = 'bewerbungs-tracker-v1';
 const urlsToCache = [
-  "./",
-  "./index.html",
-  "./manifest.json",
-  "./icon-512.png",
-  "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap",
-  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-512.png'
 ];
 
 // Installations-Ereignis: Dateien cachen
-self.addEventListener("install", event => {
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log("Cache geöffnet");
-      return cache.addAll(urlsToCache);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
   );
 });
 
 // Fetch-Ereignis: Antworten aus dem Cache liefern, falls vorhanden
-self.addEventListener("fetch", event => {
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
+    caches.match(event.request)
+      .then(response => response || fetch(event.request))
   );
 });
 
