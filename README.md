@@ -1,5 +1,8 @@
 # 📂 Bewerbungs-Tracker (PWA)
-Ein einfacher und benutzerfreundlicher Bewerbungs-Tracker als Progressive Web App (PWA), mit dem du deine Bewerbungen verwalten, exportieren und importieren kannst. 
+
+Der Bewerbungs-Tracker ist eine moderne Progressive Web App (PWA), die ich entwickelt habe, um den Bewerbungsprozess zu vereinfachen und zu organisieren. Die App ermöglicht es, Bewerbungen effizient zu verwalten und den Überblick über den Status jeder Bewerbung zu behalten.
+
+Die App wurde mit modernen Webtechnologien entwickelt und legt besonderen Wert auf Benutzerfreundlichkeit und Datenschutz durch lokale Speicherung.
 
 ## 🚀 Features
 - **📝 Bewerbungen speichern:** Erfasse Firma, Stellenbezeichnung, Datum, Status, Notizen & mehr  
