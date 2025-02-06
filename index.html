@@ -1,16 +1,646 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bewerbungs-Tracker</title>
+  <!-- Google Fonts: Roboto -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Manifest für PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#007bff">
+  <style>
+    /* Allgemeine Stile und Reset */
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h2, h3 { color: #444; }
+    label { font-weight: 500; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.3s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+    button {
+      background: #007bff;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover { background: #0056b3; }
+    /* Grüne Navigationsbuttons */
+    .nav-btn {
+      background: #28a745;
+    }
+    .nav-btn:hover { background: #218838; }
+    .hidden { display: none; }
+    /* Navigationscontainer: Zwei Bereiche (links und rechts) in einer Zeile */
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .nav-left, .nav-right {
+      display: flex;
+      gap: 10px;
+    }
+    /* Tabellendesign */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th { background: #f1f1f1; cursor: pointer; }
+    /* Einheitliche Aktions-Buttons in der Tabelle */
+    .action-btn {
+      padding: 6px 12px;
+      font-size: 0.9em;
+      margin: 0 8px;
+      min-width: 80px;
+    }
+    /* Summary-Bereich in der Übersicht */
+    #entrySummary {
+      margin-top: 20px;
+      font-weight: 500;
+      background: #eef;
+      padding: 10px;
+      border-radius: 4px;
+  /* Mobile Optimierung: Anpassungen für Bildschirme mit max. 600px Breite */
+  @media (max-width: 600px) {
+    body {
+      padding: 10px;
+    }
+    .container {
+      padding: 15px;
+      width: 100%;
+      margin: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    input, select, textarea, button {
+      font-size: 16px;
+      padding: 12px;
+    }
+    .nav-container {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+    .nav-left, .nav-right {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    table, th, td {
+      font-size: 14px;
+    }
+    th, td {
+      padding: 8px;
+    }
+  }
+    }
+  </style>
+  <!-- jsPDF-Bibliothek für PDF-Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-
 <body>
-  Hello world
-  <script src="script.js"></script>
-</body>
+<div class="container">
+  <h2>Bewerbungs-Tracker</h2>
+  
+  <!-- Eingabeseite: Formular zur manuellen Eingabe -->
+  <div id="eingabeSeite" class="hidden">
+    <!-- Formularfelder -->
+    <label>Firma:</label>
+    <input type="text" id="firma">
+    
+    <label>Stelle:</label>
+    <input type="text" id="stelle">
+    
+    <label>Datum:</label>
+    <input type="date" id="datum">
+    
+    <label>Status:</label>
+    <select id="status">
+      <option>Bewerbung gesendet</option>
+      <option>Warten auf Antwort</option>
+      <option>Eingeladen</option>
+      <option>Abgelehnt</option>
+    </select>
+    
+    <label>Link zum Stelleninserat:</label>
+    <input type="url" id="inserat">
+    
+    <label>Screenshot des Inserats:</label>
+    <input type="file" id="screenshot" accept="image/*" capture="environment">
+    <div id="screenshotPreview"></div>
+    
+    <label>Notizen:</label>
+    <textarea id="notizen" rows="4"></textarea>
+    
+    <!-- Speichern-Button -->
+    <button onclick="speichern()">Bewerbung speichern</button>
+    
+    <!-- Navigationscontainer: Links (grün) für CSV Import, rechts für Übersicht -->
+    <div class="nav-container">
+      <div class="nav-left">
+        <button class="nav-btn" onclick="zeigeCSVImport()">CSV Import</button>
+      </div>
+      <div class="nav-right">
+        <button onclick="zeigeUebersicht()">Zur Übersicht</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- CSV Import-Seite: Separater Bereich für CSV-Import -->
+  <div id="csvImportSeite" class="hidden">
+    <h3>CSV Import</h3>
+    <input type="file" id="csvImport" accept=".csv">
+    <button onclick="importiereCSV()">CSV Importieren</button>
+    <!-- Navigationscontainer: Links für Eingabe, rechts für Übersicht -->
+    <div class="nav-container">
+      <div class="nav-left">
+        <button class="nav-btn" onclick="zeigeEingabe()">Zur Eingabe</button>
+      </div>
+      <div class="nav-right">
+        <button onclick="zeigeUebersicht()">Zur Übersicht</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Übersichtsseite: Anzeige aller Einträge und Summary -->
+  <div id="uebersichtSeite">
+    <h3>Gespeicherte Bewerbungen</h3>
+    <table>
+      <thead>
+        <tr>
+          <th onclick="sortieren('firma')">Firma</th>
+          <th onclick="sortieren('stelle')">Stelle</th>
+          <th onclick="sortieren('datum')">Datum</th>
+          <th onclick="sortieren('status')">Status</th>
+          <th onclick="sortieren('inserat')">Link</th>
+          <th>Screenshot</th>
+          <th>Aktionen</th>
+        </tr>
+      </thead>
+      <tbody id="bewerbungsliste"></tbody>
+    </table>
+    
+    <!-- Summary-Bereich: Gesamtanzahl und Aufschlüsselung pro Status -->
+    <div id="entrySummary"></div>
+    
+    <!-- Navigations- und Exportcontainer: Links für Navigation, rechts für Exporte -->
+    <div class="nav-container">
+      <div class="nav-left">
+        <button class="nav-btn" onclick="zeigeEingabe()">Zur Eingabe</button>
+        <button class="nav-btn" onclick="zeigeCSVImport()">CSV Import</button>
+      </div>
+      <div class="nav-right">
+        <button onclick="exportierenCSV()">Exportieren (CSV)</button>
+        <button onclick="exportierenPDF()">Exportieren (PDF)</button>
+      </div>
+    </div>
+  </div>
+</div>
 
+<script>
+  let bearbeiteIndex = null;
+  let sortierRichtung = {};
+
+  /* Aktualisiert den Status der Einträge basierend auf dem Datum:
+     - Mehr als 2 Tage alt: "Warten auf Antwort"
+     - Mehr als 10 Tage alt: "Nachfragen"
+  */
+  function updateStatus() {
+    let bewerbungen = JSON.parse(localStorage.getItem("bewerbungen")) || [];
+    const today = new Date();
+    let changed = false;
+    bewerbungen.forEach(entry => {
+      if (entry.datum) {
+        let entryDate = new Date(entry.datum);
+        let diffDays = (today - entryDate) / (1000 * 3600 * 24);
+        if (diffDays > 10 && entry.status !== "Nachfragen") {
+          entry.status = "Nachfragen";
+          changed = true;
+        } else if (diffDays > 2 && diffDays <= 10 && entry.status !== "Warten auf Antwort") {
+          entry.status = "Warten auf Antwort";
+          changed = true;
+        }
+      }
+    });
+    if (changed) {
+      localStorage.setItem("bewerbungen", JSON.stringify(bewerbungen));
+    }
+  }
+
+  /* Navigation-Funktionen */
+  function zeigeEingabe() {
+    document.getElementById("eingabeSeite").classList.remove("hidden");
+    document.getElementById("csvImportSeite").classList.add("hidden");
+    document.getElementById("uebersichtSeite").classList.add("hidden");
+  }
+  
+  function zeigeCSVImport() {
+    document.getElementById("eingabeSeite").classList.add("hidden");
+    document.getElementById("csvImportSeite").classList.remove("hidden");
+    document.getElementById("uebersichtSeite").classList.add("hidden");
+  }
+  
+  function zeigeUebersicht() {
+    document.getElementById("eingabeSeite").classList.add("hidden");
+    document.getElementById("csvImportSeite").classList.add("hidden");
+    document.getElementById("uebersichtSeite").classList.remove("hidden");
+    updateStatus();
+    anzeigen();
+  }
+
+  /* Speichern: Validiert das Formular, liest ggf. den Screenshot ein und speichert den Eintrag */
+  function speichern() {
+    const firma = document.getElementById("firma").value.trim();
+    const stelle = document.getElementById("stelle").value.trim();
+    const datum = document.getElementById("datum").value.trim();
+    if (!firma || !stelle || !datum) {
+      alert("Bitte füllen Sie die Felder Firma, Stelle und Datum aus.");
+      return;
+    }
+    
+    const fileInput = document.getElementById("screenshot");
+    const newFileSelected = fileInput.files.length > 0;
+    if (newFileSelected) {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        saveBewerbung(dataUrl);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      saveBewerbung(null);
+    }
+  }
+  
+  /* Speichert einen neuen Eintrag oder aktualisiert einen bestehenden */
+  function saveBewerbung(newDataUrl) {
+    const datumInput = document.getElementById("datum").value;
+    const datumFormatted = datumInput ? new Date(datumInput).toLocaleDateString("de-DE") : "";
+    const bewerbung = {
+      firma: document.getElementById("firma").value,
+      stelle: document.getElementById("stelle").value,
+      datum: datumInput,
+      datumFormatted: datumFormatted,
+      status: document.getElementById("status").value,
+      inserat: document.getElementById("inserat").value,
+      notizen: document.getElementById("notizen").value,
+      screenshot: newDataUrl || ""
+    };
+    
+    let bewerbungen = JSON.parse(localStorage.getItem("bewerbungen")) || [];
+    if (bearbeiteIndex !== null) {
+      const alteBewerbung = bewerbungen[bearbeiteIndex];
+      if (newDataUrl === null) {
+        bewerbung.screenshot = alteBewerbung.screenshot;
+      }
+      bewerbungen[bearbeiteIndex] = bewerbung;
+      bearbeiteIndex = null;
+    } else {
+      bewerbungen.push(bewerbung);
+    }
+    localStorage.setItem("bewerbungen", JSON.stringify(bewerbungen));
+    formularZuruecksetzen();
+    zeigeUebersicht();
+  }
+  
+  /* Bearbeiten: Lädt einen vorhandenen Eintrag in das Formular */
+  function bearbeiten(index) {
+    const bewerbungen = JSON.parse(localStorage.getItem("bewerbungen")) || [];
+    const b = bewerbungen[index];
+    document.getElementById("firma").value = b.firma;
+    document.getElementById("stelle").value = b.stelle;
+    document.getElementById("datum").value = b.datum;
+    document.getElementById("status").value = b.status;
+    document.getElementById("inserat").value = b.inserat;
+    document.getElementById("notizen").value = b.notizen;
+    bearbeiteIndex = index;
+    const screenshotPreview = document.getElementById("screenshotPreview");
+    screenshotPreview.innerHTML = b.screenshot 
+      ? 'Aktueller Screenshot: <a href="' + b.screenshot + '" target="_blank">Bild anzeigen</a>' 
+      : "";
+    zeigeEingabe();
+  }
+  
+  /* Löschen: Entfernt einen Eintrag */
+  function loeschen(index) {
+    let bewerbungen = JSON.parse(localStorage.getItem("bewerbungen")) || [];
+    bewerbungen.splice(index, 1);
+    localStorage.setItem("bewerbungen", JSON.stringify(bewerbungen));
+    anzeigen();
+  }
+  
+  /* Anzeigen: Füllt die Tabelle und aktualisiert den Summary-Bereich */
+  function anzeigen() {
+    const bewerbungen = JSON.parse(localStorage.getItem("bewerbungen")) || [];
+    const liste = document.getElementById("bewerbungsliste");
+    liste.innerHTML = "";
+    
+    bewerbungen.forEach((b, index) => {
+      const row = `<tr>
+        <td>${b.firma}</td>
+        <td>${b.stelle}</td>
+        <td>${b.datumFormatted}</td>
+        <td>${b.status}</td>
+        <td><a href="${b.inserat}" target="_blank">Link</a></td>
+        <td>${b.screenshot ? `<a href="${b.screenshot}" target="_blank">Bild anzeigen</a>` : ""}</td>
+        <td>
+          <button class="action-btn" onclick="bearbeiten(${index})">Bearbeiten</button>
+          <button class="action-btn" onclick="loeschen(${index})">Löschen</button>
+        </td>
+      </tr>`;
+      liste.innerHTML += row;
+    });
+    
+    // Summary: Berechnet die Gesamtanzahl und die Anzahl pro Status
+    const summaryDiv = document.getElementById("entrySummary");
+    const total = bewerbungen.length;
+    const statusCounts = {};
+    bewerbungen.forEach(b => {
+      const status = b.status;
+      statusCounts[status] = (statusCounts[status] || 0) + 1;
+    });
+    let summaryText = `Insgesamt: ${total} Einträge. `;
+    for (let key in statusCounts) {
+      summaryText += `${key}: ${statusCounts[key]}  `;
+    }
+    summaryDiv.textContent = summaryText;
+  }
+  
+  /* Setzt alle Formularfelder zurück */
+  function formularZuruecksetzen() {
+    document.getElementById("firma").value = "";
+    document.getElementById("stelle").value = "";
+    document.getElementById("datum").value = "";
+    document.getElementById("status").selectedIndex = 0;
+    document.getElementById("inserat").value = "";
+    document.getElementById("notizen").value = "";
+    document.getElementById("screenshot").value = "";
+    document.getElementById("screenshotPreview").innerHTML = "";
+  }
+  
+  /* Sortieren: Sortiert die Einträge nach dem angegebenen Schlüssel (z.B. Firma, Datum, etc.) */
+  function sortieren(schluessel) {
+    let bewerbungen = JSON.parse(localStorage.getItem("bewerbungen")) || [];
+    if (!sortierRichtung.hasOwnProperty(schluessel)) {
+      sortierRichtung[schluessel] = 1;
+    }
+    bewerbungen.sort((a, b) => {
+      const aWert = a[schluessel] ? a[schluessel].toLowerCase() : "";
+      const bWert = b[schluessel] ? b[schluessel].toLowerCase() : "";
+      if (aWert < bWert) return -1 * sortierRichtung[schluessel];
+      if (aWert > bWert) return 1 * sortierRichtung[schluessel];
+      return 0;
+    });
+    sortierRichtung[schluessel] *= -1;
+    localStorage.setItem("bewerbungen", JSON.stringify(bewerbungen));
+    anzeigen();
+  }
+  
+  /* CSV Import: Liest eine CSV-Datei ein, verarbeitet sie robust und fügt neue Einträge hinzu.
+     Überspringt Duplikate (gleiche Kombination aus Firma, Stelle und Datum) und zählt diese.
+  */
+  function importiereCSV() {
+    const fileInput = document.getElementById("csvImport");
+    if (fileInput.files.length === 0) {
+      alert("Bitte wähle eine CSV-Datei aus.");
+      return;
+    }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+  
+    reader.onload = function(e) {
+      const text = e.target.result;
+      const lines = text.split(/\r?\n/);
+      // Entferne den Header, falls vorhanden (z.B. wenn "Firma" enthalten ist)
+      if (lines.length > 0 && lines[0].toLowerCase().includes("firma")) {
+        lines.shift();
+      }
+      let bewerbungen = JSON.parse(localStorage.getItem("bewerbungen")) || [];
+      let duplicateCount = 0;
+      
+      lines.forEach(line => {
+        if (line.trim() === "") return;
+        // Splitte an Kommas, die nicht innerhalb von Anführungszeichen stehen
+        const fields = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        // Entferne führende und abschließende Anführungszeichen und trimme jedes Feld
+        const cleanedFields = fields.map(field => field.replace(/^"(.*)"$/, '$1').trim());
+        if (cleanedFields.length >= 7) {
+          const datumInput = cleanedFields[2];
+          const datumFormatted = datumInput ? new Date(datumInput).toLocaleDateString("de-DE") : "";
+          const bewerbung = {
+            firma: cleanedFields[0],
+            stelle: cleanedFields[1],
+            datum: cleanedFields[2],
+            datumFormatted: datumFormatted,
+            status: cleanedFields[3],
+            inserat: cleanedFields[4],
+            notizen: cleanedFields[5],
+            screenshot: cleanedFields[6]
+          };
+          // Prüfe, ob ein Eintrag mit gleicher Firma, Stelle und Datum bereits existiert
+          if (!bewerbungen.find(b => b.firma === bewerbung.firma && b.stelle === bewerbung.stelle && b.datum === bewerbung.datum)) {
+            bewerbungen.push(bewerbung);
+          } else {
+            duplicateCount++;
+          }
+        }
+      });
+      localStorage.setItem("bewerbungen", JSON.stringify(bewerbungen));
+      const totalCount = bewerbungen.length;
+      let msg = "CSV Import abgeschlossen.";
+      if (duplicateCount > 0) {
+        msg += " " + duplicateCount + " Einträge wurden aufgrund von Duplikaten nicht importiert.";
+      }
+      msg += " Insgesamt sind " + totalCount + " Einträge vorhanden.";
+      alert(msg);
+      zeigeUebersicht();
+    };
+  
+    reader.onerror = function(e) {
+      console.error("Fehler beim Lesen der CSV-Datei:", e);
+      alert("Beim Importieren der CSV-Datei ist ein Fehler aufgetreten.");
+    };
+  
+    reader.readAsText(file, "UTF-8");
+  }
+  
+  /* CSV Export: Erstellt eine CSV-Datei aus den gespeicherten Einträgen und startet den Download */
+  function exportierenCSV() {
+    const bewerbungen = JSON.parse(localStorage.getItem("bewerbungen")) || [];
+    if (bewerbungen.length === 0) {
+      alert("Keine Bewerbungen zum Exportieren vorhanden.");
+      return;
+    }
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += "Firma,Stelle,Datum,Status,Link,Notizen,Screenshot\n";
+    bewerbungen.forEach(b => {
+      const firma = '"' + b.firma.replace(/"/g, '""') + '"';
+      const stelle = '"' + b.stelle.replace(/"/g, '""') + '"';
+      const datum = '"' + b.datum + '"';
+      const status = '"' + b.status.replace(/"/g, '""') + '"';
+      const inserat = '"' + b.inserat.replace(/"/g, '""') + '"';
+      const notizen = '"' + b.notizen.replace(/"/g, '""') + '"';
+      const screenshot = '"' + (b.screenshot ? b.screenshot.replace(/"/g, '""') : "") + '"';
+      csvContent += [firma, stelle, datum, status, inserat, notizen, screenshot].join(",") + "\n";
+    });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    const now = new Date();
+    const day = ('0' + now.getDate()).slice(-2);
+    const month = ('0' + (now.getMonth() + 1)).slice(-2);
+    const year = now.getFullYear();
+    const fileName = `Bewerbung.${day}-${month}-${year}.csv`;
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+  
+  /* PDF Export: Erstellt ein PDF im zweispaltigen Layout (links Screenshot, rechts Text) mit Trennern.
+     Zusätzlich wird auf der ersten Seite ein Header ausgegeben, der den Titel, den Zeitraum (von – bis)
+     und die Gesamtanzahl der Einträge anzeigt – ideal für einen monatlichen Bericht.
+  */
+  function exportierenPDF() {
+    const bewerbungen = JSON.parse(localStorage.getItem("bewerbungen")) || [];
+    if (bewerbungen.length === 0) {
+      alert("Keine Bewerbungen zum Exportieren vorhanden.");
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFont("Helvetica", "normal");
+    doc.setFontSize(12);
+    
+    // --- Header-Bereich auf der ersten Seite ---
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const leftMargin = 15;
+    const rightMargin = 15;
+    
+    // Berechne den Zeitraum (min/max Datum) und Gesamtanzahl der Einträge
+    let minDate = null, maxDate = null;
+    bewerbungen.forEach(entry => {
+      if (entry.datum) {
+        let d = new Date(entry.datum);
+        if (!minDate || d < minDate) minDate = d;
+        if (!maxDate || d > maxDate) maxDate = d;
+      }
+    });
+    const minDateStr = minDate ? minDate.toLocaleDateString("de-DE") : "-";
+    const maxDateStr = maxDate ? maxDate.toLocaleDateString("de-DE") : "-";
+    const totalEntries = bewerbungen.length;
+    
+    // Titel und Berichtkopf (zentriert)
+    doc.setFontSize(16);
+    doc.text("Monatlicher Bewerbungsbericht", pageWidth / 2, 15, { align: "center" });
+    doc.setFontSize(12);
+    doc.text(`Zeitraum: ${minDateStr} - ${maxDateStr}`, pageWidth / 2, 25, { align: "center" });
+    doc.text(`Anzahl Einträge: ${totalEntries}`, pageWidth / 2, 33, { align: "center" });
+    // Trennlinie unter dem Header
+    doc.line(leftMargin, 38, pageWidth - rightMargin, 38);
+    
+    // Detaillierter Eintragsbereich
+    let startY = 50;
+    const imageWidth = 60;
+    const imageHeight = 60;
+    const gap = 10;
+    const textX = leftMargin + imageWidth + gap;
+    const textWidth = pageWidth - textX - rightMargin;
+    const lineHeight = 7;
+    
+    bewerbungen.forEach(b => {
+      let textContent = `Firma: ${b.firma}\nStelle: ${b.stelle}\nDatum: ${b.datumFormatted}\nStatus: ${b.status}\nInserat: ${b.inserat}\nNotizen: ${b.notizen}`;
+      let textLines = doc.splitTextToSize(textContent, textWidth);
+      let textBlockHeight = textLines.length * lineHeight;
+      let rowHeight = Math.max(imageHeight, textBlockHeight) + 20;
+      
+      // Vertikale Zentrierung: Berechne Offsets für Bild und Text
+      let imageOffsetY = startY + (rowHeight - imageHeight) / 2;
+      let textOffsetY = startY + (rowHeight - textBlockHeight) / 2 + lineHeight;
+      
+      if (b.screenshot) {
+        let format = b.screenshot.indexOf("jpeg") !== -1 ? "JPEG" : "PNG";
+        try {
+          doc.addImage(b.screenshot, format, leftMargin, imageOffsetY, imageWidth, imageHeight);
+        } catch(e) {
+          console.error("Fehler beim Hinzufügen des Bildes:", e);
+        }
+      }
+      doc.text(textLines, textX, textOffsetY);
+      
+      startY += rowHeight;
+      // Zeichne eine horizontale Trennlinie
+      doc.setDrawColor(200);
+      doc.setLineWidth(0.5);
+      doc.line(leftMargin, startY, pageWidth - rightMargin, startY);
+      startY += 10;
+      if (startY > doc.internal.pageSize.getHeight() - 30) {
+        doc.addPage();
+        startY = 20;
+      }
+    });
+    
+    // Speichere das PDF mit aktuellem Datum im Dateinamen
+    const now = new Date();
+    const day = ('0' + now.getDate()).slice(-2);
+    const month = ('0' + (now.getMonth() + 1)).slice(-2);
+    const year = now.getFullYear();
+    doc.save(`Bewerbung.${day}-${month}-${year}.pdf`);
+  }
+  
+  // Beim Laden der Seite stets die Übersichtsseite anzeigen
+  document.addEventListener("DOMContentLoaded", function() {
+    zeigeUebersicht();
+  });
+</script>
+
+<!-- Service Worker Registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('service-worker.js')
+      .then(function(registration) {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      }, function(err) {
+        console.log('ServiceWorker registration failed: ', err);
+      });
+    });
+  }
+</script>
+</body>
 </html>
