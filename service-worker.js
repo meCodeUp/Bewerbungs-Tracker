@@ -5,7 +5,9 @@ const urlsToCache = [
   "./",
   "./index.html",
   "./manifest.json",
-  // Füge hier weitere Dateien hinzu, die du cachen möchtest (z.B. CSS, JS, Icons)
+  "./icon-512.png",
+  "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap",
+  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
 ];
 
 // Installations-Ereignis: Dateien cachen
