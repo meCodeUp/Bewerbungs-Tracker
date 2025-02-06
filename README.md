@@ -47,3 +47,4 @@ Dieses Projekt steht unter der **MIT-Lizenz** – freie Nutzung & Anpassung erla
 💡 **Feedback & Ideen?** Starte eine Diskussion oder erstelle ein Issue!  
 🌟 **Gefällt dir das Projekt?** Lass ein ⭐ im Repository da!  
 
+# Bewerbungs-Tracker
