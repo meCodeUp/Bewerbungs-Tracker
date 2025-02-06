@@ -2,7 +2,7 @@
 
 Der Bewerbungs-Tracker ist eine moderne Progressive Web App (PWA), die ich entwickelt habe, um den Bewerbungsprozess zu vereinfachen und zu organisieren. Die App ermöglicht es, Bewerbungen effizient zu verwalten und den Überblick über den Status jeder Bewerbung zu behalten.
 
-Die App wurde mit modernen Webtechnologien entwickelt und legt besonderen Wert auf Benutzerfreundlichkeit und Datenschutz durch lokale Speicherung.
+Die App wurde mit modernen Webtechnologien entwickelt und legt besonderen Wert auf Benutzerfreundlichkeit und Datenschutz durch lokale Speicherung. :)
 
 ## 🚀 Features
 - **📝 Bewerbungen speichern:** Erfasse Firma, Stellenbezeichnung, Datum, Status, Notizen & mehr  
@@ -49,5 +49,3 @@ Dieses Projekt steht unter der **MIT-Lizenz** – freie Nutzung & Anpassung erla
 
 💡 **Feedback & Ideen?** Starte eine Diskussion oder erstelle ein Issue!  
 🌟 **Gefällt dir das Projekt?** Lass ein ⭐ im Repository da!  
-
-# Bewerbungs-Tracker
