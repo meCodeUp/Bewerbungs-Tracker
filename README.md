@@ -11,7 +11,7 @@ Die App wurde mit modernen Webtechnologien entwickelt und legt besonderen Wert a
   - Nach 10 Tagen → "Nachfragen"  
 - **📂 CSV-Import & Export:** Einfache Verwaltung von Bewerbungen als CSV-Datei  
 - **📚 PDF-Export:** Erstelle einen Monatsbericht mit Bewerbungsdetails und Screenshots  
-- **🌐 Installierbar als PWA (Coming Soon)**  
+- **🌐 Installierbar als PWA**  
 - **🛠️ Lokale Speicherung:** Alle Daten werden im Browser gespeichert  
 
 ## 📷 Screenshots
