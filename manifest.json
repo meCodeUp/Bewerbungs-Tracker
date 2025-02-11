@@ -28,5 +28,12 @@
     "productivity",
     "utilities"
   ],
-  "description": "Der Bewerbungs-Tracker ist eine moderne Progressive Web-App, um den Bewerbungsprozess zu vereinfachen und zu organisieren."
+  "description": "Der Bewerbungs-Tracker ist eine moderne Progressive Web-App, um den Bewerbungsprozess zu vereinfachen und zu organisieren.",
+  "shortcuts": [
+    {
+      "name": " Bewerbungs-Tracker",
+      "url": "https://mecodeup.github.io/Bewerbungs-Tracker/",
+      "description": "Öffne den  Bewerbungs-Tracker"
+    }
+  ]
 }
