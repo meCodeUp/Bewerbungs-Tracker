@@ -19,5 +19,14 @@
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#007bff",
-  "background_color": "#f7f7f7"
+  "background_color": "#f7f7f7",
+  "dir": "rtl",
+  "lang": "de",
+  "scope": "https://mecodeup.github.io/Bewerbungs-Tracker/",
+  "prefer_related_applications": false,
+  "categories": [
+    "business",
+    "productivity",
+    "utilities"
+  ]
 }
