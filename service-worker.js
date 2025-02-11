@@ -1,41 +1,18 @@
-// service-worker.js
+// This is the "Offline copy of pages" service worker
 
-const CACHE_NAME = 'bewerbungs-tracker-v1';
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-512.png'
-];
+const CACHE = "pwabuilder-offline";
 
-// Installations-Ereignis: Dateien cachen
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-  );
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
+
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
-// Fetch-Ereignis: Antworten aus dem Cache liefern, falls vorhanden
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-  );
-});
-
-// Activate-Ereignis: Alte Caches löschen
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log("Lösche alten Cache:", cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-});
+workbox.routing.registerRoute(
+  new RegExp('/*'),
+  new workbox.strategies.StaleWhileRevalidate({
+    cacheName: CACHE
+  })
+);
